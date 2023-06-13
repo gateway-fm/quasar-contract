@@ -9,8 +9,8 @@ contract Quasar is Ownable {
 
     // Currency metadata struct
     struct Currency {
-        string symbol;
         string name;
+        string symbol;
     }
 
     // Mapping currency ID to currency metadata
@@ -31,4 +31,50 @@ contract Quasar is Ownable {
     constructor(){
         _nextID = 1;
     }
+
+    /*
+     * Allows to get current next ID
+     *
+     * @return next currency ID as uint64
+     */
+    function getNextID() external view returns(uint64) {
+        return _nextID;
+    }
+
+    /*
+     * Allows to add new currency
+     *
+     * Requirements:
+     * - caller should be a contract owner
+     * - name cannot be blank
+     * - symbol cannot be blank
+     *
+     * @param name - currency name
+     * @param symbol - currency symbol
+     *
+     * @emits `CurrencyAdded` event with ID, name and symbol as arguments
+     */
+    function addCurrency(string memory name, string memory symbol) external onlyOwner {
+        require(bytes(name).length >0, "Quasar: name cannot be blank");
+        require(bytes(symbol).length >0, "Quasar: symbol cannot be blank");
+
+        uint64 id = _nextID;
+
+        _currencies[id] = Currency(name, symbol);
+        _nextID++;
+
+        emit CurrencyAdded(id, name, symbol);
+    }
+
+    /*
+     * Allows to get currency metadata by given ID
+     *
+     * @param id - currency ID
+     *
+     * @return currency metadata as Currency struct type
+     */
+    function getCurrencyMetadata(uint64 id) external view returns(Currency memory) {
+        return _currencies[id];
+    }
+
 }
