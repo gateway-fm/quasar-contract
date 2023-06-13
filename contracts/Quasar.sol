@@ -19,6 +19,9 @@ contract Quasar is Ownable {
     // Mapping currency ID to currency price
     mapping(uint64 => uint256) private _currencyPrices;
 
+    // Mapping currency ID to currency state. If true, currency is supported
+    mapping(uint64 => bool) private _isCurrencySupported;
+
     // Triggered whenever new currency is added
     event CurrencyAdded(uint64 indexed id, string name, string symbol);
 
@@ -27,6 +30,9 @@ contract Quasar is Ownable {
 
     // Triggered whenever currency price is updated
     event PriceUpdated(uint64 indexed id, uint256 price);
+
+    // Triggered whenever currency state is changed
+    event CurrencyStateChanged(uint64 indexed id, bool state);
 
     constructor(){
         _nextID = 1;
@@ -62,6 +68,7 @@ contract Quasar is Ownable {
 
         _currencies[id] = Currency(name, symbol);
         _nextID++;
+        _isCurrencySupported[id] = true;
 
         emit CurrencyAdded(id, name, symbol);
     }
@@ -82,7 +89,7 @@ contract Quasar is Ownable {
      * @emits `CurrencyUpdated` event with ID, name and symbol as arguments
      */
     function updateCurrency(uint64 id, string memory name, string memory symbol) external onlyOwner {
-        require(_isCurrencyExists(id), "Quasar: currency should exist");
+        require(isCurrencySupported(id), "Quasar: currency should be supported");
         require(bytes(name).length >0, "Quasar: name cannot be blank");
         require(bytes(symbol).length >0, "Quasar: symbol cannot be blank");
 
@@ -116,7 +123,7 @@ contract Quasar is Ownable {
      * @emit PriceUpdated event with id and price as arguments
      */
     function pushPrice(uint64 id, uint256 price) external onlyOwner {
-        require(_isCurrencyExists(id), "Quasar: currency should exist");
+        require(isCurrencySupported(id), "Quasar: currency should be supported");
 
         _currencyPrices[id] = price;
 
@@ -132,6 +139,37 @@ contract Quasar is Ownable {
      */
     function getPrice(uint64 id) external view returns(uint256) {
         return _currencyPrices[id];
+    }
+
+    /*
+     * Allows to change currency state
+     *
+     * Requirements:
+     * - caller should be a contract owner
+     * - currency should exist
+     *
+     * @param id - currency ID
+     * @param state - new currency state
+     *
+     * @emit CurrencyStateChanged event with id and new state as arguments
+     */
+    function changeCurrencyState(uint64 id, bool state) external onlyOwner {
+        require(_isCurrencyExists(id), "Quasar: currency does not exist");
+
+        _isCurrencySupported[id] = state;
+
+        emit CurrencyStateChanged(id, state);
+    }
+
+    /*
+     * Allows to get current currency state
+     *
+     * @param id - currency ID
+     *
+     * @return currency state as bool
+     */
+    function isCurrencySupported(uint64 id) public view returns(bool) {
+        return _isCurrencySupported[id];
     }
 
     // Allows to check if currency exist by given currency ID

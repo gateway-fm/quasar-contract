@@ -218,7 +218,7 @@ describe("Quasar unit tests", function () {
 
             const tx = quasar.updateCurrency(1, newName, newSymbol);
 
-            await expect(tx).to.be.revertedWith("Quasar: currency should exist");
+            await expect(tx).to.be.revertedWith("Quasar: currency should be supported");
         });
     });
 
@@ -335,7 +335,90 @@ describe("Quasar unit tests", function () {
 
             const tx = quasar.pushPrice(1, price);
 
-            await expect(tx).to.be.revertedWith("Quasar: currency should exist");
+            await expect(tx).to.be.revertedWith("Quasar: currency should be supported");
+        });
+    });
+
+    describe("Change state", function () {
+        it("Should change currency state", async function () {
+            const { quasar } = await loadFixture(deployFixture);
+            const name = "currency";
+            const symbol = "CRN";
+
+            await quasar.addCurrency(name, symbol);
+            await quasar.changeCurrencyState(1, false);
+
+            expect(await quasar.isCurrencySupported(1)).to.equal(false);
+        });
+
+        it("Should change currency state several times", async function () {
+            const { quasar } = await loadFixture(deployFixture);
+            const name = "currency";
+            const symbol = "CRN";
+
+            await quasar.addCurrency(name, symbol);
+            await quasar.changeCurrencyState(1, false);
+            expect(await quasar.isCurrencySupported(1)).to.equal(false);
+
+            await quasar.changeCurrencyState(1, true);
+            expect(await quasar.isCurrencySupported(1)).to.equal(true);
+
+            await quasar.changeCurrencyState(1, false);
+            expect(await quasar.isCurrencySupported(1)).to.equal(false);
+
+        });
+
+        it("Should change currency state for several currencies", async function () {
+            const { quasar } = await loadFixture(deployFixture);
+            const name1 = "currency1";
+            const symbol1 = "CRN1";
+            const name2 = "currency2";
+            const symbol2 = "CRN2";
+            const name3 = "currency3";
+            const symbol3 = "CRN3";
+
+
+            await quasar.addCurrency(name1, symbol1);
+            await quasar.addCurrency(name2, symbol2);
+            await quasar.addCurrency(name3, symbol3);
+
+            await quasar.changeCurrencyState(1, false);
+            expect(await quasar.isCurrencySupported(1)).to.equal(false);
+
+            await quasar.changeCurrencyState(2, false);
+            expect(await quasar.isCurrencySupported(2)).to.equal(false);
+
+            expect(await quasar.isCurrencySupported(3)).to.equal(true);
+        });
+
+        it("Should emit event", async function () {
+            const { quasar } = await loadFixture(deployFixture);
+            const name = "currency";
+            const symbol = "CRN";
+
+            await quasar.addCurrency(name, symbol);
+            const tx = quasar.changeCurrencyState(1, false);
+
+            await expect(tx).to.emit(quasar, "CurrencyStateChanged").withArgs(1, false);
+        });
+
+        it("Should not change state if caller is not the owner", async function () {
+            const { quasar, address1 } = await loadFixture(deployFixture);
+            const name = "currency";
+            const symbol = "CRN";
+
+            await quasar.addCurrency(name, symbol);
+            const tx = quasar.connect(address1).changeCurrencyState(1, false);
+
+            await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
+        });
+
+        it("Should not change state if currency does not exist", async function () {
+            const { quasar } = await loadFixture(deployFixture);
+
+            const tx = quasar.changeCurrencyState(1, false);
+
+            await expect(tx).to.be.revertedWith("Quasar: currency does not exist");
         });
     });
 
