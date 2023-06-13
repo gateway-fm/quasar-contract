@@ -103,6 +103,37 @@ contract Quasar is Ownable {
         return _currencies[id];
     }
 
+    /*
+     * Allows to push price for given currency ID
+     *
+     * Requirements:
+     * - caller should be a contract owner
+     * - currency should exist
+     *
+     * @param id - currency ID
+     * @param price - currency price
+     *
+     * @emit PriceUpdated event with id and price as arguments
+     */
+    function pushPrice(uint64 id, uint256 price) external onlyOwner {
+        require(_isCurrencyExists(id), "Quasar: currency should exist");
+
+        _currencyPrices[id] = price;
+
+        emit PriceUpdated(id, price);
+    }
+
+    /*
+     * Allows to get currency price
+     *
+     * @param id - currency ID
+     *
+     * @return currency price as uint256
+     */
+    function getPrice(uint64 id) external view returns(uint256) {
+        return _currencyPrices[id];
+    }
+
     // Allows to check if currency exist by given currency ID
     function _isCurrencyExists(uint64 id) internal view returns(bool) {
         return bytes(_currencies[id].name).length > 0;

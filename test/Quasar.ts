@@ -221,4 +221,122 @@ describe("Quasar unit tests", function () {
             await expect(tx).to.be.revertedWith("Quasar: currency should exist");
         });
     });
+
+    describe("Push price", function () {
+        it("Should push price", async function () {
+            const { quasar } = await loadFixture(deployFixture);
+            const name = "currency";
+            const symbol = "CRN";
+            const price = ethers.parseEther("0.1");
+
+            await quasar.addCurrency(name, symbol);
+            await quasar.pushPrice(1, price);
+
+            expect(await quasar.getPrice(1)).to.equal(price);
+        });
+
+        it("Should change price", async function () {
+            const { quasar } = await loadFixture(deployFixture);
+            const name = "currency";
+            const symbol = "CRN";
+            const price = ethers.parseEther("0.1");
+            const newPrice = ethers.parseEther("0.5");
+
+            await quasar.addCurrency(name, symbol);
+            await quasar.pushPrice(1, price);
+            await quasar.pushPrice(1, newPrice);
+
+            expect(await quasar.getPrice(1)).to.equal(newPrice);
+        });
+
+        it("Should push price for several currencies", async function () {
+            const { quasar } = await loadFixture(deployFixture);
+            const name1 = "currency1";
+            const symbol1 = "CRN1";
+            const name2 = "currency2";
+            const symbol2 = "CRN2";
+            const name3 = "currency3";
+            const symbol3 = "CRN3";
+            const price1 = ethers.parseEther("0.1");
+            const price2 = ethers.parseEther("0.2");
+            const price3 = ethers.parseEther("0.3");
+
+            await quasar.addCurrency(name1, symbol1);
+            await quasar.addCurrency(name2, symbol2);
+            await quasar.addCurrency(name3, symbol3);
+
+            await quasar.pushPrice(1, price1);
+            await quasar.pushPrice(2, price2);
+            await quasar.pushPrice(3, price3);
+
+            expect(await quasar.getPrice(1)).to.equal(price1);
+            expect(await quasar.getPrice(2)).to.equal(price2);
+            expect(await quasar.getPrice(3)).to.equal(price3);
+        });
+
+        it("Should update price for several currencies", async function () {
+            const { quasar } = await loadFixture(deployFixture);
+            const name1 = "currency1";
+            const symbol1 = "CRN1";
+            const name2 = "currency2";
+            const symbol2 = "CRN2";
+            const name3 = "currency3";
+            const symbol3 = "CRN3";
+            const price1 = ethers.parseEther("0.1");
+            const price2 = ethers.parseEther("0.2");
+            const price3 = ethers.parseEther("0.3");
+
+            const newPrice1 = ethers.parseEther("0.11");
+            const newPrice2 = ethers.parseEther("0.22");
+
+            await quasar.addCurrency(name1, symbol1);
+            await quasar.addCurrency(name2, symbol2);
+            await quasar.addCurrency(name3, symbol3);
+
+            await quasar.pushPrice(1, price1);
+            await quasar.pushPrice(2, price2);
+            await quasar.pushPrice(3, price3);
+
+            await quasar.pushPrice(1, newPrice1);
+            await quasar.pushPrice(2, newPrice2);
+
+            expect(await quasar.getPrice(1)).to.equal(newPrice1);
+            expect(await quasar.getPrice(2)).to.equal(newPrice2);
+            expect(await quasar.getPrice(3)).to.equal(price3);
+        });
+
+        it("Should emit event", async function () {
+            const { quasar } = await loadFixture(deployFixture);
+            const name = "currency";
+            const symbol = "CRN";
+            const price = ethers.parseEther("0.1");
+
+            await quasar.addCurrency(name, symbol);
+            const tx = quasar.pushPrice(1, price);
+
+            await expect(tx).to.emit(quasar, "PriceUpdated").withArgs(1, price);
+        });
+
+        it("Should not push price for not owner", async function () {
+            const { quasar, address1 } = await loadFixture(deployFixture);
+            const name = "currency";
+            const symbol = "CRN";
+            const price = ethers.parseEther("0.1");
+
+            await quasar.addCurrency(name, symbol);
+            const tx = quasar.connect(address1).pushPrice(1, price);
+
+            await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
+        });
+
+        it("Should not push price if currency does not exist", async function () {
+            const { quasar } = await loadFixture(deployFixture);
+            const price = ethers.parseEther("0.1");
+
+            const tx = quasar.pushPrice(1, price);
+
+            await expect(tx).to.be.revertedWith("Quasar: currency should exist");
+        });
+    });
+
 })
