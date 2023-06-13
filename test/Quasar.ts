@@ -117,4 +117,108 @@ describe("Quasar unit tests", function () {
             await expect(tx).to.be.revertedWith("Quasar: symbol cannot be blank")
         });
     });
+
+    describe("Update currency", function () {
+        it("Should update currency", async function () {
+            const { quasar } = await loadFixture(deployFixture);
+            const name = "currency";
+            const symbol = "CRN";
+
+            const newName = "Ncurrency";
+            const newSymbol = "NCRN";
+
+            await quasar.addCurrency(name, symbol);
+            await quasar.updateCurrency(1, newName, newSymbol);
+
+            const currency = await quasar.getCurrencyMetadata(1);
+
+            expect(currency.name).to.equal(newName);
+            expect(currency.symbol).to.equal(newSymbol);
+        });
+
+        it("Should update several currencies", async function () {
+            const { quasar } = await loadFixture(deployFixture);
+            const name1 = "currency1";
+            const symbol1 = "CRN1";
+            const name2 = "currency2";
+            const symbol2 = "CRN2";
+            const name3 = "currency3";
+            const symbol3 = "CRN3";
+
+            const newName1 = "Ncurrency1";
+            const newSymbol1 = "NCRN1";
+            const newName2 = "Ncurrency2";
+            const newSymbol2 = "NCRN2";
+
+            await quasar.addCurrency(name1, symbol1);
+            await quasar.addCurrency(name2, symbol2);
+            await quasar.addCurrency(name3, symbol3);
+
+            await quasar.updateCurrency(1, newName1, newSymbol1);
+            await quasar.updateCurrency(2, newName2, newSymbol2);
+
+            const currency1 = await quasar.getCurrencyMetadata(1);
+            const currency2 = await quasar.getCurrencyMetadata(2);
+            const currency3 = await quasar.getCurrencyMetadata(3);
+
+            expect(currency1.name).to.equal(newName1);
+            expect(currency1.symbol).to.equal(newSymbol1);
+            expect(currency2.name).to.equal(newName2);
+            expect(currency2.symbol).to.equal(newSymbol2);
+            expect(currency3.name).to.equal(name3);
+            expect(currency3.symbol).to.equal(symbol3);
+        });
+
+        it("Should mot update currency for not contract owner", async function () {
+            const { quasar, address1 } = await loadFixture(deployFixture);
+            const name = "currency";
+            const symbol = "CRN";
+
+            const newName = "Ncurrency";
+            const newSymbol = "NCRN";
+
+            await quasar.addCurrency(name, symbol);
+            const tx = quasar.connect(address1).updateCurrency(1, newName, newSymbol);
+
+            await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
+        });
+
+        it("Should not update currency with blank name", async function () {
+            const { quasar} = await loadFixture(deployFixture);
+            const name = "currency";
+            const symbol = "CRN";
+
+            const newName = "";
+            const newSymbol = "NCRN";
+
+            await quasar.addCurrency(name, symbol);
+            const tx = quasar.updateCurrency(1, newName, newSymbol);
+
+            await expect(tx).to.be.revertedWith("Quasar: name cannot be blank");
+        });
+
+        it("Should not update currency with blank symbol", async function () {
+            const { quasar} = await loadFixture(deployFixture);
+            const name = "currency";
+            const symbol = "CRN";
+
+            const newName = "Ncurrency";
+            const newSymbol = "";
+
+            await quasar.addCurrency(name, symbol);
+            const tx = quasar.updateCurrency(1, newName, newSymbol);
+
+            await expect(tx).to.be.revertedWith("Quasar: symbol cannot be blank");
+        });
+
+        it("Should mot update currency if not exist", async function () {
+            const { quasar} = await loadFixture(deployFixture);
+            const newName = "Ncurrency";
+            const newSymbol = "NCRN";
+
+            const tx = quasar.updateCurrency(1, newName, newSymbol);
+
+            await expect(tx).to.be.revertedWith("Quasar: currency should exist");
+        });
+    });
 })

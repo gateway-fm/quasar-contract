@@ -67,6 +67,32 @@ contract Quasar is Ownable {
     }
 
     /*
+     * Allows to update existing currency
+     *
+     * Requirements:
+     * - caller should be a contract owner
+     * - currency should exist
+     * - name cannot be blank
+     * - symbol cannot be blank
+     *
+     * @param id - currency ID
+     * @param name - currency name
+     * @param symbol - currency symbol
+     *
+     * @emits `CurrencyUpdated` event with ID, name and symbol as arguments
+     */
+    function updateCurrency(uint64 id, string memory name, string memory symbol) external onlyOwner {
+        require(_isCurrencyExists(id), "Quasar: currency should exist");
+        require(bytes(name).length >0, "Quasar: name cannot be blank");
+        require(bytes(symbol).length >0, "Quasar: symbol cannot be blank");
+
+        _currencies[id].name = name;
+        _currencies[id].symbol = symbol;
+
+        emit CurrencyUpdated(id, name, symbol);
+    }
+
+    /*
      * Allows to get currency metadata by given ID
      *
      * @param id - currency ID
@@ -75,6 +101,11 @@ contract Quasar is Ownable {
      */
     function getCurrencyMetadata(uint64 id) external view returns(Currency memory) {
         return _currencies[id];
+    }
+
+    // Allows to check if currency exist by given currency ID
+    function _isCurrencyExists(uint64 id) internal view returns(bool) {
+        return bytes(_currencies[id].name).length > 0;
     }
 
 }
