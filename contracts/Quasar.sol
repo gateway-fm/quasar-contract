@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -34,7 +34,7 @@ contract Quasar is Ownable {
     // Triggered whenever currency state is changed
     event CurrencyStateChanged(uint64 indexed id, bool state);
 
-    constructor(){
+    constructor() {
         _nextID = 1;
     }
 
@@ -43,7 +43,7 @@ contract Quasar is Ownable {
      *
      * @return next currency ID as uint64
      */
-    function getNextID() external view returns(uint64) {
+    function getNextID() external view returns (uint64) {
         return _nextID;
     }
 
@@ -61,8 +61,8 @@ contract Quasar is Ownable {
      * @emits `CurrencyAdded` event with ID, name and symbol as arguments
      */
     function addCurrency(string memory name, string memory symbol) external onlyOwner {
-        require(bytes(name).length >0, "Quasar: name cannot be blank");
-        require(bytes(symbol).length >0, "Quasar: symbol cannot be blank");
+        require(bytes(name).length > 0, "Quasar: name cannot be blank");
+        require(bytes(symbol).length > 0, "Quasar: symbol cannot be blank");
 
         uint64 id = _nextID;
 
@@ -89,9 +89,9 @@ contract Quasar is Ownable {
      * @emits `CurrencyUpdated` event with ID, name and symbol as arguments
      */
     function updateCurrency(uint64 id, string memory name, string memory symbol) external onlyOwner {
-        require(isCurrencySupported(id), "Quasar: currency should be supported");
-        require(bytes(name).length >0, "Quasar: name cannot be blank");
-        require(bytes(symbol).length >0, "Quasar: symbol cannot be blank");
+        require(_isCurrencySupported[id], "Quasar: currency should be supported");
+        require(bytes(name).length > 0, "Quasar: name cannot be blank");
+        require(bytes(symbol).length > 0, "Quasar: symbol cannot be blank");
 
         _currencies[id].name = name;
         _currencies[id].symbol = symbol;
@@ -106,7 +106,7 @@ contract Quasar is Ownable {
      *
      * @return currency metadata as Currency struct type
      */
-    function getCurrencyMetadata(uint64 id) external view returns(Currency memory) {
+    function getCurrencyMetadata(uint64 id) external view returns (Currency memory) {
         return _currencies[id];
     }
 
@@ -123,7 +123,7 @@ contract Quasar is Ownable {
      * @emit PriceUpdated event with id and price as arguments
      */
     function pushPrice(uint64 id, uint256 price) external onlyOwner {
-        require(isCurrencySupported(id), "Quasar: currency should be supported");
+        require(_isCurrencySupported[id], "Quasar: currency should be supported");
 
         _currencyPrices[id] = price;
 
@@ -137,7 +137,9 @@ contract Quasar is Ownable {
      *
      * @return currency price as uint256
      */
-    function getPrice(uint64 id) external view returns(uint256) {
+    function getPrice(uint64 id) external view returns (uint256) {
+        require(_isCurrencyExists(id), "Quasar: currency does not exist");
+
         return _currencyPrices[id];
     }
 
@@ -168,13 +170,12 @@ contract Quasar is Ownable {
      *
      * @return currency state as bool
      */
-    function isCurrencySupported(uint64 id) public view returns(bool) {
+    function isCurrencySupported(uint64 id) external view returns (bool) {
         return _isCurrencySupported[id];
     }
 
     // Allows to check if currency exist by given currency ID
-    function _isCurrencyExists(uint64 id) internal view returns(bool) {
+    function _isCurrencyExists(uint64 id) internal view returns (bool) {
         return bytes(_currencies[id].name).length > 0;
     }
-
 }
