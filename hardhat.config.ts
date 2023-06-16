@@ -1,6 +1,6 @@
 import "@nomicfoundation/hardhat-toolbox";
-import {task} from "hardhat/config";
-import {deploy} from "./scripts/Quasar";
+import { task } from "hardhat/config";
+import { deploy } from "./scripts/Quasar";
 
 task("deploy", "Deploy contract").setAction(async (args, hre) => {
   await hre.run("compile");
