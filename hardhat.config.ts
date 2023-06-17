@@ -1,6 +1,6 @@
 import "@nomicfoundation/hardhat-toolbox";
-import {task} from "hardhat/config";
-import {deploy} from "./scripts/Quasar";
+import { task } from "hardhat/config";
+import { deploy } from "./scripts/Quasar";
 
 task("deploy", "Deploy contract").setAction(async (args, hre) => {
   await hre.run("compile");
@@ -29,7 +29,7 @@ module.exports = {
         network: "zkEVM",
         chainId: 1101,
         urls: {
-          apiURL: "https://zkevm.polygonscan.com/api",
+          apiURL: "https://api-zkevm.polygonscan.com/api",
           browserURL: "https://zkevm.polygonscan.com",
         },
       },
@@ -37,8 +37,8 @@ module.exports = {
         network: "zkEVMTest",
         chainId: 1442,
         urls: {
-          apiURL: "https://explorer.public.zkevm-test.net/api",
-          browserURL: "https://explorer.public.zkevm-test.net",
+          apiURL: "https://api-testnet-zkevm.polygonscan.com/api",
+          browserURL: "https://testnet-zkevm.polygonscan.com",
         },
       },
     ],

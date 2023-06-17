@@ -7,40 +7,40 @@ const contractName = "Quasar";
 const addressesDir = path.join(__dirname, "..", "addresses");
 
 export async function deploy(hre: HardhatRuntimeEnvironment) {
-    const [deployer] = await hre.ethers.getSigners();
+  const [deployer] = await hre.ethers.getSigners();
 
-    console.log("Deploying contract with the account:", deployer.address);
+  console.log("Deploying contract with the account:", deployer.address);
 
-    const Contract = await hre.ethers.getContractFactory(contractName);
-    const contract = await Contract.deploy();
-    await contract.waitForDeployment();
+  const Contract = await hre.ethers.getContractFactory(contractName);
+  const contract = await Contract.deploy();
+  await contract.waitForDeployment();
 
-    const address = await contract.getAddress();
+  const address = await contract.getAddress();
 
-    console.log("Contract deployed to address:", address);
+  console.log("Contract deployed to address:", address);
 
-    if (hre.network.name === "zkEVM" || hre.network.name === "zkEVMTest") {
-        await _saveContractAddresses({ address });
+  if (hre.network.name === "zkEVM" || hre.network.name === "zkEVMTest") {
+    await _saveContractAddresses({ address });
 
-        console.log("Waiting 30 seconds before hre.etherscan verification...");
-        await new Promise(f => setTimeout(f, 30000));
+    console.log("Waiting 30 seconds before hre.etherscan verification...");
+    await new Promise(f => setTimeout(f, 30000));
 
-        await hre.run("verify:verify", {
-            address: address,
-            constructorArguments: [],
-        });
-    }
+    await hre.run("verify:verify", {
+      address: address,
+      constructorArguments: [],
+    });
+  }
 }
 
 const _saveContractAddresses = async (addresses: { address: string }) => {
-    const { address } = addresses;
+  const { address } = addresses;
 
-    if (!fs.existsSync(addressesDir)) {
-        fs.mkdirSync(addressesDir);
-    }
+  if (!fs.existsSync(addressesDir)) {
+    fs.mkdirSync(addressesDir);
+  }
 
-    fs.writeFileSync(
-        path.join(addressesDir, "/", contractName + "-contractAddress.json"),
-        JSON.stringify({ [contractName]: address }),
-    );
+  fs.writeFileSync(
+    path.join(addressesDir, "/", contractName + "-contractAddress.json"),
+    JSON.stringify({ [contractName]: address }),
+  );
 };
