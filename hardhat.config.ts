@@ -8,37 +8,25 @@ task("deploy", "Deploy contract").setAction(async (args, hre) => {
 });
 
 module.exports = {
-  solidity: "0.8.18",
+  solidity: "0.8.21",
   mocha: {
     timeout: 200000,
   },
   networks: {
-    zkEVM: {
-      url: process.env.PROVIDER_URL,
-      accounts: [process.env.PRIVATE_KEY as string],
-    },
-    zkEVMTest: {
-      url: process.env.PROVIDER_URL,
-      accounts: [process.env.PRIVATE_KEY as string],
-    },
+    rollup: {
+      url: process.env.RPC,
+      accounts: [process.env.PK as string],
+    }
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY as string,
+    apiKey: JSON.parse(`{"${process.env.CHAIN_NAME as string}":"secret"}`),
     customChains: [
       {
-        network: "zkEVM",
-        chainId: 1101,
+        network: process.env.CHAIN_NAME,
+        chainId: parseInt(process.env.CHAIN_ID as string),
         urls: {
-          apiURL: "https://api-zkevm.polygonscan.com/api",
-          browserURL: "https://zkevm.polygonscan.com",
-        },
-      },
-      {
-        network: "zkEVMTest",
-        chainId: 1442,
-        urls: {
-          apiURL: "https://api-testnet-zkevm.polygonscan.com/api",
-          browserURL: "https://testnet-zkevm.polygonscan.com",
+          apiURL: process.env.BLOCKSCOUT_URL_API,
+          browserURL: process.env.BLOCKSCOUT_URL,
         },
       },
     ],

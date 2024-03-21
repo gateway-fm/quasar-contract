@@ -9,7 +9,7 @@ const addressesDir = path.join(__dirname, "..", "addresses");
 export async function deploy(hre: HardhatRuntimeEnvironment) {
   const [deployer] = await hre.ethers.getSigners();
 
-  console.log("Deploying contract with the account:", deployer.address);
+  console.log("Deploying contract with the account:", deployer.address, "on network:", process.env.CHAIN_NAME);
 
   const Contract = await hre.ethers.getContractFactory(contractName);
   const contract = await Contract.deploy();
@@ -19,7 +19,7 @@ export async function deploy(hre: HardhatRuntimeEnvironment) {
 
   console.log("Contract deployed to address:", address);
 
-  if (hre.network.name === "zkEVM" || hre.network.name === "zkEVMTest") {
+  if (hre.network.name === "rollup") {
     await _saveContractAddresses({ address });
 
     console.log("Waiting 30 seconds before hre.etherscan verification...");

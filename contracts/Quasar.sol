@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.21;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -36,6 +36,42 @@ contract Quasar is Ownable {
 
     constructor() {
         _nextID = 1;
+    }
+
+    /*
+     * Allows to get currency ID
+     *
+     * @param symbol - currency symbol
+     *
+     * @return currency ID as uint64
+     * @return is currency active as bool
+     */
+    function getCurrencyID(string memory symbol) external view returns(uint64, bool) {
+        for (uint64 i = 0; i < _nextID; i++) {
+            if (keccak256(abi.encode(_currencies[i+1].symbol)) == keccak256(abi.encode(symbol))) {
+                return (i+1, _isCurrencySupported[i+1]);
+            }
+        }
+
+        return (0, false);
+    }
+
+    /*
+     * Allows to get all supported currencies
+     *
+     * @return currencies as Currency struct array
+     * @return is currency active statuses as bool array
+     */
+    function getSupportedCurrencies() external view returns(Currency[] memory, bool[] memory) {
+        Currency[] memory currencies = new Currency[](_nextID-1);
+        bool[] memory isActive = new bool[](_nextID-1);
+
+        for (uint64 i = 0; i < _nextID; i++) {
+            currencies[i] = _currencies[i+1];
+            isActive[i] = _isCurrencySupported[i+1];
+        }
+
+        return (currencies, isActive);
     }
 
     /*
