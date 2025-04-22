@@ -34,7 +34,7 @@ contract Quasar is Ownable {
     // Triggered whenever currency state is changed
     event CurrencyStateChanged(uint64 indexed id, bool state);
 
-    constructor() {
+    constructor() Ownable(msg.sender) {
         _nextID = 1;
     }
 
@@ -46,10 +46,10 @@ contract Quasar is Ownable {
      * @return currency ID as uint64
      * @return is currency active as bool
      */
-    function getCurrencyID(string memory symbol) external view returns(uint64, bool) {
+    function getCurrencyID(string memory symbol) external view returns (uint64, bool) {
         for (uint64 i = 0; i < _nextID; i++) {
-            if (keccak256(abi.encode(_currencies[i+1].symbol)) == keccak256(abi.encode(symbol))) {
-                return (i+1, _isCurrencySupported[i+1]);
+            if (keccak256(abi.encode(_currencies[i + 1].symbol)) == keccak256(abi.encode(symbol))) {
+                return (i + 1, _isCurrencySupported[i + 1]);
             }
         }
 
@@ -62,13 +62,13 @@ contract Quasar is Ownable {
      * @return currencies as Currency struct array
      * @return is currency active statuses as bool array
      */
-    function getSupportedCurrencies() external view returns(Currency[] memory, bool[] memory) {
-        Currency[] memory currencies = new Currency[](_nextID-1);
-        bool[] memory isActive = new bool[](_nextID-1);
+    function getSupportedCurrencies() external view returns (Currency[] memory, bool[] memory) {
+        Currency[] memory currencies = new Currency[](_nextID - 1);
+        bool[] memory isActive = new bool[](_nextID - 1);
 
         for (uint64 i = 0; i < _nextID; i++) {
-            currencies[i] = _currencies[i+1];
-            isActive[i] = _isCurrencySupported[i+1];
+            currencies[i] = _currencies[i + 1];
+            isActive[i] = _isCurrencySupported[i + 1];
         }
 
         return (currencies, isActive);

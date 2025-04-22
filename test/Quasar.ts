@@ -94,7 +94,7 @@ describe("Quasar unit tests", function () {
 
       const tx = quasar.connect(address1).addCurrency(name, symbol);
 
-      await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
+      await expect(tx).to.be.revertedWithCustomError(quasar, "OwnableUnauthorizedAccount");
     });
 
     it("Should not add currency with blank name", async function () {
@@ -180,7 +180,7 @@ describe("Quasar unit tests", function () {
       await quasar.addCurrency(name, symbol);
       const tx = quasar.connect(address1).updateCurrency(1, newName, newSymbol);
 
-      await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
+      await expect(tx).to.be.revertedWithCustomError(quasar, "OwnableUnauthorizedAccount");
     });
 
     it("Should not update currency with blank name", async function () {
@@ -326,7 +326,7 @@ describe("Quasar unit tests", function () {
       await quasar.addCurrency(name, symbol);
       const tx = quasar.connect(address1).pushPrice(1, price);
 
-      await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
+      await expect(tx).to.be.revertedWithCustomError(quasar, "OwnableUnauthorizedAccount");
     });
 
     it("Should not push price if currency does not exist", async function () {
@@ -408,7 +408,7 @@ describe("Quasar unit tests", function () {
       await quasar.addCurrency(name, symbol);
       const tx = quasar.connect(address1).changeCurrencyState(1, false);
 
-      await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
+      await expect(tx).to.be.revertedWithCustomError(quasar, "OwnableUnauthorizedAccount");
     });
 
     it("Should not change state if currency does not exist", async function () {
