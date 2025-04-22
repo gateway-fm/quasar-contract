@@ -16,7 +16,7 @@ module.exports = {
     rollup: {
       url: process.env.RPC,
       accounts: [process.env.PK as string],
-    }
+    },
   },
   etherscan: {
     apiKey: JSON.parse(`{"${process.env.CHAIN_NAME as string}":"secret"}`),
